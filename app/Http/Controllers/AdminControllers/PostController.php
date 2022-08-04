@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\AdminControllers;
 
-use App\Models\Post;
+use App\Models\AdminMoldels\Post;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -15,8 +15,9 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
-        return "test of posts";
+
+        $posts = Post::with(["user" ,"image" , "category" , "tags"])->paginate(10) ;
+        return view("" , ["posts" => $posts]);
     }
 
     /**
@@ -26,7 +27,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        return view();
     }
 
     /**
@@ -37,7 +38,14 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+           "Title" => "bail|required|String",
+           "Content" => "bail|required|String" ,
+           "category_id" => "bail|required|Numeric" ,
+           "user_id" => "bail|required|Numeric"
+        ]);
+
+        Post::create($request->all());
     }
 
     /**
@@ -48,7 +56,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        return view("" , ["post" => $post]);
     }
 
     /**
@@ -59,7 +67,7 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        return view("" , ["post" => $post]);
     }
 
     /**
@@ -71,7 +79,15 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-        //
+        $request->validate([
+           "Title" => "bail|required|String",
+           "Content" => "bail|required|String" ,
+           "category_id" => "bail|required|Numeric" ,
+           "user_id" => "bail|required|Numeric"
+        ]);
+        $post = Post::findOrFail($request->input(id));
+        $post->update($request->all());
+        return redirect()->back()->with("message" , "Post has been updated !");
     }
 
     /**
@@ -82,6 +98,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        $post->delete();
+        return redirect()->back()->with("message" , "Post has been deleted !");
     }
 }
