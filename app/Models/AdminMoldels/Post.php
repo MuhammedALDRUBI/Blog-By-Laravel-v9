@@ -35,7 +35,10 @@ class Post extends Model
 
     public function image()
     {
-        return $this->hasOne(Image::class , "post_id" , "id");
+        return $this->hasOne(Image::class , "post_id" , "id")->withDefault([
+            "folder_path" => "/" ,
+            "image_name" => "any name"
+        ]);
     }
 
 

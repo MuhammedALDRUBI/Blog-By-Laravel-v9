@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers\AdminControllers;
 
+use App\Models\AdminMoldels\Category;
+use App\Models\AdminMoldels\Image;
 use App\Models\AdminMoldels\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
+use PhpParser\Builder;
 
 class PostController extends Controller
 {
@@ -17,7 +23,17 @@ class PostController extends Controller
     {
 
         $posts = Post::with(["user" ,"image" , "category" , "tags"])->paginate(10) ;
-        return view("" , ["posts" => $posts]);
+
+        foreach ($posts as $post){
+            echo $post->user->name . "<br>";
+            echo $post->image->folder_path . $post->image->image_name . "<br>";
+            echo $post->category->cat_name . "<br>";
+            foreach ($post->tags as $tag) {
+                echo $tag->tag_name . "<br>";
+            }
+            echo "<hr>";
+        }
+////        return view("" , ["posts" => $posts]);
     }
 
     /**
@@ -27,7 +43,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view();
+        return  "create page";
+//        return view();
     }
 
     /**
@@ -41,11 +58,21 @@ class PostController extends Controller
         $request->validate([
            "Title" => "bail|required|String",
            "Content" => "bail|required|String" ,
-           "category_id" => "bail|required|Numeric" ,
-           "user_id" => "bail|required|Numeric"
+           "category_id" => "bail|required|Numeric"
         ]);
 
-        Post::create($request->all());
+        $post = Post::create([
+            "Title" => $request->input('Title') ,
+            "Content" => $request->input('Content') ,
+            "user_id" => Auth::user()->id
+        ]);
+        $category = Category::find($request->input('category_id'));
+        if($post != null && $category != null){
+            $post_image = new Image(["folder_path" =>  "/" , "image_name" => "test.jpg"]);
+            $post->image()->save($post_image);
+            $post->category()->associate($category);
+            $post->tags()->sync($request->input('tags'));
+        }
     }
 
     /**
@@ -56,7 +83,19 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        return view("" , ["post" => $post]);
+//        $path1 = Storage::disk("local")->path("1.jpg");
+//        $path2 = Storage::disk("public")->url("1.jpg");
+//        echo  $path1 . "<br>";
+//        echo  $path2 . "<br>";
+//        echo "<img src=" . asset($path2) . ">";
+
+        $image = Storage::disk("public")->get("1.jpg");
+        echo Storage::disk("public")->put("new/test.jpg" , $image );
+//        if($post){
+//            return $post;
+//        }
+//        return redirect()->back();
+//        return view("" , ["post" => $post]);
     }
 
     /**
