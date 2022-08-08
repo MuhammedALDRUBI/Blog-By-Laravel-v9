@@ -2,22 +2,34 @@
 
 @section("content")
 
-Author : {{ $post->user->name }}  <br>
+    <div class="container">
+        <div class="post-box d-flex col-10 mx-auto my-2 text-center" style="height:400px">
+            <div class="img-tags-box col-6">
+                <div class="img-box w-75 mx-auto my-1" style="height:70%">
+                    <img style="max-width:100%; max-height: 100%" src="{{asset("storage/" . $post->image->folder_path . "/" . $post->image->image_name)}}" >
+                </div>
+                <small>Author : {{ $post->user->name }}  / Category : {{ $post->category->cat_name  }} </small>
+                    @if(! $post->tags->isEmpty())
+                    <p> <span>Post Tags : </span>
+                        @foreach ($post->tags as $tag)
+                            #{{ $tag->tag_name  }} ,
+                        @endforeach
+                    @endif
 
-Post Poster :
-<img style="max-width:200px ;" src="{{asset("storage/" . $post->image->folder_path . "/" . $post->image->image_name)}}" >
+                </p>
+                <a class="btn btn-success" href="{{route("admin.posts.edit" , ["post" => $post])}}">Edit</a>
 
-<br>
-Category : {{ $post->category->cat_name  }} <br>
-tags : @foreach ($post->tags as $tag)
-    {{ $tag->tag_name  }} ,
-@endforeach
-<a href="{{route("admin.posts.edit" , ["post" => $post])}}">edit Post</a>
+                <form class="d-inline-block" action="{{ route("admin.posts.destroy" , ["post" => $post]) }}" method="POST">
+                    @csrf
+                    @method("DELETE")
+                    <input class="btn btn-danger" type="submit" value="Delete">
+                </form>
+            </div>
 
-<form action="{{ route("admin.posts.destroy" , ["post" => $post]) }}" method="POST">
-    @csrf
-    @method("DELETE")
-    <input type="submit" value="Delete">
-</form>
-<hr>
+            <div class="post-info col-6">
+                <h4>{{ $post->Title }}</h4>
+                <div class="content text-start">{{$post->Content}}</div>
+            </div>
+        </div>
+    </div>
 @endsection

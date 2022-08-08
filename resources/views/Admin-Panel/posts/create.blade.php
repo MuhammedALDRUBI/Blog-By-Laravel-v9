@@ -3,9 +3,14 @@
 
 @section("content")
 
-    @foreach ($errors->all() as $message)
-        error : {{$message}} <br>
-    @endforeach
+    @if(! $errors->isEmpty())
+        <div class="alert-box container mx-auto my-2">
+            @foreach ($errors->all() as $message)
+                <p class="alert alert-danger">{{$message}}</p>
+            @endforeach
+        </div>
+    @endif
+
 
     <div class="w-50 mx-auto my-4">
         <form method="POST" action="{{route("admin.posts.store")}}" enctype="multipart/form-data">

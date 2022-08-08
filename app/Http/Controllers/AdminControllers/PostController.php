@@ -38,7 +38,7 @@ class PostController extends Controller
         $request->validate([
            "Title" => "bail|required|String",
            "Content" => "bail|required|String" ,
-           "category_id" => "bail|integer",
+           "category_id" => "bail|nullable|integer",
            "tags" => "bail|required|array",
            "Post_image" => "bail|required|image"
         ]);
@@ -50,13 +50,16 @@ class PostController extends Controller
             "category_id" => $request->input('category_id') ,
         ]);
 
-        $found_tags_count = Tag::whereIn("id" , $request->input('tags'))->count();
+        $tagsFromRequest =  $request->input('tags') ;
+        $found_tags_count = Tag::whereIn("id" , $tagsFromRequest)->count();
         $image_object = $request->file("Post_image");
         $image_extenssion = $image_object->getClientOriginalExtension();
         $image_new_name = $post->id . "." .  $image_extenssion;
 
         if($post != null && $found_tags_count === count($request->input("tags"))){
-            $post->tags()->sync($request->input('tags'));
+            if($found_tags_count != 0){
+                $post->tags()->sync($request->input('tags'));
+            }
             $post_image_object = new Image(["folder_path" =>  "post_images" , "image_name" => $image_new_name]);
             $post->image()->save($post_image_object);
             $image_object->storeAs("post_images" , $image_new_name , "public");
@@ -87,27 +90,32 @@ class PostController extends Controller
         $request->validate([
             "Title" => "bail|required|String",
             "Content" => "bail|required|String" ,
-            "category_id" => "bail|integer",
+            "category_id" => "bail|nullable|integer",
             "tags" => "bail|required|array",
-            "Post_image" => "image"
+            "Post_image" => "nullable|image"
         ]);
 
-        $found_tags_count = Tag::whereIn("id" , $request->input('tags'))->count();
+        $tagsFromRequest =   $request->input('tags');
+        $found_tags_count = Tag::whereIn("id" , $tagsFromRequest)->count();
+
         $image_object = $request->file("Post_image");
-        $image_extenssion = $image_object->getClientOriginalExtension();
-        $image_new_name = $post->id . "." .  $image_extenssion;
 
         if( $found_tags_count === count($request->input("tags"))){
             $post->update($request->all());
             $post->tags()->sync($request->input('tags'));
 
-            $post_image_object = $post->image;
-            $post_image_object->folder_path =  "post_images" ;
-            $post_image_object->image_name = $image_new_name;
-            $post_image_object->save();
+            if($image_object !== null){
+                $image_extenssion = $image_object->getClientOriginalExtension();
+                $image_new_name = $post->id . "." .  $image_extenssion;
 
-            $image_object = $request->file("Post_image");
-            $image_object->storeAs("post_images" , $image_new_name , "public");
+                $post_image_object = $post->image;
+                $post_image_object->folder_path =  "post_images" ;
+                $post_image_object->image_name = $image_new_name;
+                $post_image_object->save();
+
+                $image_object = $request->file("Post_image");
+                $image_object->storeAs("post_images" , $image_new_name , "public");
+            }
 
             return redirect()->route("admin.posts.show" , ["post" => $post ])->with(["message" => "Post has been updated !" ]);
         }
