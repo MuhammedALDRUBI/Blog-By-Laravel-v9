@@ -5,128 +5,114 @@ namespace App\Http\Controllers\AdminControllers;
 use App\Models\AdminMoldels\Category;
 use App\Models\AdminMoldels\Image;
 use App\Models\AdminMoldels\Post;
+use App\Models\AdminMoldels\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
 use PhpParser\Builder;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
 
         $posts = Post::with(["user" ,"image" , "category" , "tags"])->paginate(10) ;
-
-        foreach ($posts as $post){
-            echo $post->user->name . "<br>";
-            echo $post->image->folder_path . $post->image->image_name . "<br>";
-            echo $post->category->cat_name . "<br>";
-            foreach ($post->tags as $tag) {
-                echo $tag->tag_name . "<br>";
-            }
-            echo "<hr>";
-        }
-////        return view("" , ["posts" => $posts]);
+        return view("Admin-Panel.posts.index" , ["posts" => $posts]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function create()
     {
-        return  "create page";
-//        return view();
+        $categories = Category::cursor();
+        $tags = Tag::cursor();
+        return view("Admin-Panel.posts.create" , ["categories" => $categories , "tags" => $tags]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+
     public function store(Request $request)
     {
         $request->validate([
            "Title" => "bail|required|String",
            "Content" => "bail|required|String" ,
-           "category_id" => "bail|required|Numeric"
+           "category_id" => "bail|integer",
+           "tags" => "bail|required|array",
+           "Post_image" => "bail|required|image"
         ]);
 
-        $post = Post::create([
-            "Title" => $request->input('Title') ,
-            "Content" => $request->input('Content') ,
-            "user_id" => Auth::user()->id
-        ]);
-        $category = Category::find($request->input('category_id'));
-        if($post != null && $category != null){
-            $post_image = new Image(["folder_path" =>  "/" , "image_name" => "test.jpg"]);
-            $post->image()->save($post_image);
-            $post->category()->associate($category);
+        $found_tags_count = Tag::whereIn("id" , $request->input('tags'))->count();
+        $image_object = $request->file("Post_image");
+        $image_extenssion = $image_object->getClientOriginalExtension();
+
+        if($found_tags_count === count($request->input("tags"))){
+
+            $post = Post::create([
+                "Title" => $request->input('Title') ,
+                "Content" => $request->input('Content') ,
+                "user_id" => Auth::user()->id,
+                "category_id" => $request->input('category_id') ,
+            ]);
+
             $post->tags()->sync($request->input('tags'));
+            $image_new_name = $post->id . "." .  $image_extenssion;
+            $post_image_object = new Image(["folder_path" =>  "post_images" , "image_name" => $image_new_name]);
+            $post->image()->save($post_image_object);
+            $image_object->storeAs("post_images" , $image_new_name , "public");
+
+            return redirect()->route("admin.posts.index");
         }
+        return redirect()->back()->withErrors(["error" => "there is a wrong !"]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
+
     public function show(Post $post)
     {
-//        $path1 = Storage::disk("local")->path("1.jpg");
-//        $path2 = Storage::disk("public")->url("1.jpg");
-//        echo  $path1 . "<br>";
-//        echo  $path2 . "<br>";
-//        echo "<img src=" . asset($path2) . ">";
-
-        $image = Storage::disk("public")->get("1.jpg");
-        echo Storage::disk("public")->put("new/test.jpg" , $image );
-//        if($post){
-//            return $post;
-//        }
-//        return redirect()->back();
-//        return view("" , ["post" => $post]);
+        $variables_array = ["post" => $post  ];
+        return view("Admin-Panel.posts.show" , $variables_array);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
+
     public function edit(Post $post)
     {
-        return view("" , ["post" => $post]);
+        $categories = Category::cursor();
+        $tags = Tag::cursor();
+        $variables_array = ["post" => $post  , "categories" => $categories , "tags" => $tags  ];
+        return view("Admin-Panel.posts.edit" , $variables_array);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Post  $post
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Post $post)
     {
         $request->validate([
-           "Title" => "bail|required|String",
-           "Content" => "bail|required|String" ,
-           "category_id" => "bail|required|Numeric" ,
-           "user_id" => "bail|required|Numeric"
+            "Title" => "bail|required|String",
+            "Content" => "bail|required|String" ,
+            "category_id" => "bail|integer",
+            "tags" => "bail|required|array",
+            "Post_image" => "image"
         ]);
-        $post = Post::findOrFail($request->input(id));
-        $post->update($request->all());
-        return redirect()->back()->with("message" , "Post has been updated !");
+
+        $found_tags_count = Tag::whereIn("id" , $request->input('tags'))->count();
+        $image_object = $request->file("Post_image");
+        $image_extenssion = $image_object->getClientOriginalExtension();
+        $image_new_name = $post->id . "." .  $image_extenssion;
+
+        if( $found_tags_count === count($request->input("tags"))){
+            $post->update($request->all());
+            $post->tags()->sync($request->input('tags'));
+
+            $post_image_object = $post->image;
+            $post_image_object->folder_path =  "post_images" ;
+            $post_image_object->image_name = $image_new_name;
+            $post_image_object->save();
+
+            $image_object = $request->file("Post_image");
+            $image_object->storeAs("post_images" , $image_new_name , "public");
+
+            return redirect()->route("admin.posts.show" , ["post" => $post ])->with(["message" => "Post has been updated !" ]);
+        }
+        return redirect()->back()->withErrors(["error" => "there is a wrong !"]);
     }
 
     /**
@@ -138,6 +124,6 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         $post->delete();
-        return redirect()->back()->with("message" , "Post has been deleted !");
+        return redirect()->route("admin.posts.index")->with("message" , "Post has been deleted !");
     }
 }
