@@ -1,3 +1,7 @@
+@extends('Admin-Panel.layouts.app')
+
+@section("content")
+
 @foreach ($posts as $post)
 Author : {{ $post->user->name }}  <br>
 Post Poster :
@@ -12,3 +16,5 @@ tags : @foreach ($post->tags as $tag)
 <hr>
 @endforeach
 <a href="{{ route("admin.posts.create") }}">Create a new post</a>
+
+@endsection

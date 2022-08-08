@@ -43,21 +43,20 @@ class PostController extends Controller
            "Post_image" => "bail|required|image"
         ]);
 
+        $post = Post::create([
+            "Title" => $request->input('Title') ,
+            "Content" => $request->input('Content') ,
+            "user_id" => Auth::user()->id,
+            "category_id" => $request->input('category_id') ,
+        ]);
+
         $found_tags_count = Tag::whereIn("id" , $request->input('tags'))->count();
         $image_object = $request->file("Post_image");
         $image_extenssion = $image_object->getClientOriginalExtension();
+        $image_new_name = $post->id . "." .  $image_extenssion;
 
-        if($found_tags_count === count($request->input("tags"))){
-
-            $post = Post::create([
-                "Title" => $request->input('Title') ,
-                "Content" => $request->input('Content') ,
-                "user_id" => Auth::user()->id,
-                "category_id" => $request->input('category_id') ,
-            ]);
-
+        if($post != null && $found_tags_count === count($request->input("tags"))){
             $post->tags()->sync($request->input('tags'));
-            $image_new_name = $post->id . "." .  $image_extenssion;
             $post_image_object = new Image(["folder_path" =>  "post_images" , "image_name" => $image_new_name]);
             $post->image()->save($post_image_object);
             $image_object->storeAs("post_images" , $image_new_name , "public");
