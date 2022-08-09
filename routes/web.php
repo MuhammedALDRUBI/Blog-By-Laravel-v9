@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', function(){
+    echo "This is our Blog main page .... ";
+    echo "<a href='" . route("website.posts") . "' >Show Posts</a>";
+})->name("main");
+Route::get('posts', "GuestPostController@index")->name("posts");
+Route::get('post/show/{post}', "GuestPostController@show")->name("post.show");

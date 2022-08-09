@@ -79,6 +79,7 @@ class PostController extends Controller
 
     public function edit(Post $post)
     {
+        $this->authorize('update', $post);
         $categories = Category::cursor();
         $tags = Tag::cursor();
         $variables_array = ["post" => $post  , "categories" => $categories , "tags" => $tags  ];
@@ -87,6 +88,7 @@ class PostController extends Controller
 
     public function update(Request $request, Post $post)
     {
+        $this->authorize('update', $post);
         $request->validate([
             "Title" => "bail|required|String",
             "Content" => "bail|required|String" ,
@@ -130,6 +132,7 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
+        $this->authorize('delete', $post);
         $post->delete();
         return redirect()->route("admin.posts.index")->with("message" , "Post has been deleted !");
     }

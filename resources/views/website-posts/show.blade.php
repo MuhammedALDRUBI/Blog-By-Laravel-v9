@@ -1,4 +1,4 @@
-@extends('layouts.admin-dashboard')
+@extends('layouts.website-layout')
 
 @section("content")
 
@@ -17,17 +17,19 @@
                     @endif
                 </p>
 
-                @can("update" , $post)
-                    <a class="btn btn-success" href="{{route("admin.posts.edit" , ["post" => $post])}}">Edit</a>
-                @endcan
+                @auth
+                    @can("update" , $post)
+                        <a class="btn btn-success" href="{{route("admin.posts.edit" , ["post" => $post])}}">Edit</a>
+                    @endcan
 
-                @can("delete" , $post)
-                    <form class="d-inline-block" action="{{ route("admin.posts.destroy" , ["post" => $post]) }}" method="POST">
-                        @csrf
-                        @method("DELETE")
-                        <input class="btn btn-danger" type="submit" value="Delete">
-                    </form>
-                @endcan
+                    @can("delete" , $post)
+                        <form class="d-inline-block" action="{{ route("admin.posts.destroy" , ["post" => $post]) }}" method="POST">
+                            @csrf
+                            @method("DELETE")
+                            <input class="btn btn-danger" type="submit" value="Delete">
+                        </form>
+                    @endcan
+                @endauth
             </div>
 
             <div class="post-info col-6">
