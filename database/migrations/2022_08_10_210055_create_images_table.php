@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string("folder_path" , 100);
             $table->string("image_name" , 100);
-            $table->foreignId("post_id")->constrained("posts")->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId("post_id")->unique()->constrained("posts")->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

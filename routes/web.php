@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Resources\tagResource;
+use App\Models\AdminMoldels\Tag;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -20,3 +21,4 @@ Route::get('/', function(){
 })->name("main");
 Route::get('posts', "GuestPostController@index")->name("posts");
 Route::get('post/show/{post}', "GuestPostController@show")->name("post.show");
+
