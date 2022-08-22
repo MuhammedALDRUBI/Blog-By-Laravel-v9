@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\AdminControllers;
 
 use App\Models\AdminMoldels\Category;
+use http\Env\Response;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use MongoDB\Driver\Session;
 
 class CategoryController extends Controller
 {
@@ -15,7 +17,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+
     }
 
     /**

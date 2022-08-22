@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\AdminMoldels\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Session;
 
 class GuestPostController extends Controller
 {
@@ -18,6 +20,12 @@ class GuestPostController extends Controller
     {
         $variables_array = ["post" => $post  ];
         return view("website-posts.show" , $variables_array);
+    }
+    public function test( )
+    {
+        Session::put("testKey" , "1");
+        Cookie::queue('name', "Muhammed" , 10);
+
     }
 
 }

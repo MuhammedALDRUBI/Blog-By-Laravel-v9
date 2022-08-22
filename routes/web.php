@@ -4,6 +4,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Resources\tagResource;
 use App\Models\AdminMoldels\Tag;
+use App\Models\AdminMoldels\Category;
+use App\Models\AdminMoldels\Post;
+use App\Models\User;
+use Database\Factories\PostFactory;
+use Database\Factories\UserFactory;
+use Database\Factories\CategoryFactory;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -22,3 +28,4 @@ Route::get('/', function(){
 Route::get('posts', "GuestPostController@index")->name("posts");
 Route::get('post/show/{post}', "GuestPostController@show")->name("post.show");
 
+Route::get('post/test', "GuestPostController@test");

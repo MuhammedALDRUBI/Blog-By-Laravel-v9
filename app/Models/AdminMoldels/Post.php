@@ -2,6 +2,7 @@
 
 namespace App\Models\AdminMoldels;
 
+use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,5 +45,11 @@ class Post extends Model
 
     public function tags(){
         return $this->belongsToMany(Tag::class , "post_tag" , "post_id"  ,  "tag_id" );
+    }
+
+
+    protected static function newFactory()
+    {
+        return PostFactory::new();
     }
 }

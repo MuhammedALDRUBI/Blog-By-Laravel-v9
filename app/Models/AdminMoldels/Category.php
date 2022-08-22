@@ -2,6 +2,7 @@
 
 namespace App\Models\AdminMoldels;
 
+use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -34,5 +35,10 @@ class Category extends Model
     public function posts()
     {
         return $this->hasMany(Post::class , "category_id" , "id");
+    }
+
+    protected static function newFactory()
+    {
+        return CategoryFactory::new();
     }
 }
