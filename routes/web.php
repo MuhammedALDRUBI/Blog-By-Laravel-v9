@@ -22,8 +22,10 @@ use Database\Factories\CategoryFactory;
 */
 
 Route::get('/', function(){
-    echo "This is our Blog main page .... ";
-    echo "<a href='" . route("website.posts") . "' >Show Posts</a>";
+    $categories = DB::scalar("select count(*) as count from categories where cat_name = ?" , ["رياضة"]);
+    return $categories;
+//    echo "This is our Blog main page .... ";
+//    echo "<a href='" . route("website.posts") . "' >Show Posts</a>";
 })->name("main");
 Route::get('posts', "GuestPostController@index")->name("posts");
 Route::get('post/show/{post}', "GuestPostController@show")->name("post.show");
